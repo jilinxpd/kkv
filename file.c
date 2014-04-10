@@ -53,23 +53,30 @@ ssize_t freed_memory_in_file(void)
 
 #define KKV_REQ_BUF_SIZE (2 * PAGE_SIZE)
 
-static char *kkv_req_buffer;
+struct kkv_file_info {
+    char kkv_req_buffer[KKV_REQ_BUF_SIZE];
+};
 
-int prepare_in_file(void)
+static int kkv_open(struct inode *inode, struct file *file)
 {
-	kkv_req_buffer = kmalloc(KKV_REQ_BUF_SIZE, GFP_KERNEL);
+    struct kkv_file_info *kfi;
+
+    kfi = kmalloc(sizeof(struct kkv_file_info), GFP_KERNEL);
 #ifdef DEBUG_KKV_STAT
-	used_mem += KKV_REQ_BUF_SIZE;
+    used_mem += KKV_REQ_BUF_SIZE;
 #endif
-	return kkv_req_buffer ? 0 : -ENOMEM;
+    file->private_data = kfi;
+
+    return kfi ? 0 : -ENOMEM;
 }
 
-void clean_in_file(void)
+static int kkv_release(struct inode *inode, struct file *file)
 {
-	kfree(kkv_req_buffer);
+    kfree(file->private_data);
 #ifdef DEBUG_KKV_STAT
-	freed_mem += KKV_REQ_BUF_SIZE;
+    freed_mem += KKV_REQ_BUF_SIZE;
 #endif
+    return 0;
 }
 
 static ssize_t kkv_aio_read(struct kiocb *iocb, const struct iovec *iov,
@@ -223,9 +230,10 @@ static ssize_t kkv_DIO(int rw, struct kiocb *iocb, const struct iovec *iov,
 {
 	ssize_t ret;
 	struct kkv_request req;
-	//char *value;
+        struct file *file = iocb->ki_filp;
+        char *kkv_req_buffer=file->private_data;
+
 #ifdef DEBUG_KKV_FS
-	struct file *file = iocb->ki_filp;
 	printk("the file name: %s\n", file->f_dentry->d_name.name);
 #endif
 	ret = kkv_parse_cmd(kkv_req_buffer, &req, rw, iov, nr_segs);
@@ -306,6 +314,8 @@ const struct file_operations kkv_file_operations = {
 	.write = do_sync_write,
 	.aio_write = kkv_aio_write,
 	.mmap = generic_file_mmap,
+        .open=kkv_open,
+        .release=kkv_release,
 	.fsync = noop_fsync,
 	.splice_read = generic_file_splice_read,
 	.splice_write = generic_file_splice_write,

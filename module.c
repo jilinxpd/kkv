@@ -42,16 +42,6 @@ static int __init kkv_init(void)
 {
 	int ret;
 
-	ret = prepare_in_file();
-	if (ret < 0) {
-#ifdef DEBUG_KKV_FS
-		printk("prepare_in_file() failed in kkv_mount()\n");
-#endif
-		goto out;
-	}
-#ifdef DEBUG_KKV_STAT
-	printk("total used mem=%ld\n", total_used_mem());
-#endif
 	ret = init_item_system();
 	if (ret < 0) {
 #ifdef DEBUG_KKV_FS
@@ -96,10 +86,6 @@ static void __exit kkv_exit(void)
 	printk("total freed mem=%ld\n", total_freed_mem());
 #endif
 	destroy_item_system();
-#ifdef DEBUG_KKV_STAT
-	printk("total freed mem=%ld\n", total_freed_mem());
-#endif
-	clean_in_file();
 #ifdef DEBUG_KKV_STAT
 	printk("total freed mem=%ld\n", total_freed_mem());
 #endif
