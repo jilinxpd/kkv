@@ -75,7 +75,7 @@ ssize_t read_item(struct item *it, char *buf, ssize_t nbuf)
 
 	nleft = nbuf;
 
-	while (!it && nleft > 0) {
+	while (it && nleft > 0) {
 		len = VALUE_SIZE_OF_ITEM(it);
 		if (len > nleft)
 			len = nleft;
