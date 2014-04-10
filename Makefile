@@ -4,4 +4,4 @@
 
 obj-m += kkv.o
 
-kkv-y +=  slab2.o item3.o itemx2.o hash.o engine.o file.o inode.o fs.o module.o
+kkv-y +=  slab.o item.o itemx.o hash.o engine.o file.o inode.o fs.o module.o
