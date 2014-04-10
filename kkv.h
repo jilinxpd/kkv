@@ -6,10 +6,6 @@
  * This file is released under the GPL.
  */
 
-//#define DEBUG_KKV_FS
-//#define DEBUG_KKV_ENGINE
-//#define DEBUG_KKV_SLAB
-//#define DEBUG_KKV_STAT
 #define KKV_ON_KMALLOC
 
 /*
