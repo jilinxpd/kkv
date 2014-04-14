@@ -13,162 +13,157 @@
 
 ssize_t engine_set(char *key, ssize_t nkey, char *value, ssize_t nvalue)
 {
-	struct item *it;
-	struct itemx *itx;
-	uint32_t key_md;
-	struct itemx **cur_header;
+    struct item *it;
+    struct itemx *itx;
+    uint32_t key_md;
+    struct itemx **cur_header;
 
-	key_md = hash(key, nkey, 0);
+    key_md = hash(key, nkey, 0);
 #ifdef DEBUG_KKV_ENGINE
-	printk("the key_md is 0x%x\n", key_md);
+    printk("the key_md is 0x%x\n", key_md);
 #endif
-	it = create_item(key, nkey, value, nvalue);
-	if (!it) {
+    it = create_item(key, nkey, value, nvalue);
+    if (!it) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("create_item() failed in engine_update()\n");
+        printk("create_item() failed in engine_update()\n");
 #endif
-		return -ENOSPC;
-	}
+        return -ENOSPC;
+    }
 
-	itx = locate_itemx(key_md, key, nkey, &cur_header, 1);
-	if (itx) {
-		return update_itemx(itx, it);
-	} else {
-		itx = create_itemx(key_md, it);
-		if (!itx) {
+    itx = locate_itemx(key_md, key, nkey, &cur_header, 1);
+    if (itx) {
+        return update_itemx(itx, it);
+    } else {
+        itx = create_itemx(key_md, it);
+        if (!itx) {
 #ifdef DEBUG_KKV_ENGINE
-			printk("create_itemx() failed in engine_create()\n");
+            printk("create_itemx() failed in engine_create()\n");
 #endif
-			return -ENOSPC;
-		}
-		return add_itemx(itx, cur_header);
-	}
+            return -ENOSPC;
+        }
+        return add_itemx(itx, cur_header);
+    }
 }
 
 ssize_t engine_add(char *key, ssize_t nkey, char *value, ssize_t nvalue)
 {
-	struct item *it;
-	struct itemx *itx;
-	uint32_t key_md;
-	struct itemx **cur_header = NULL;
+    struct item *it;
+    struct itemx *itx;
+    uint32_t key_md;
+    struct itemx **cur_header = NULL;
 
-	key_md = hash(key, nkey, 0);
+    key_md = hash(key, nkey, 0);
 #ifdef DEBUG_KKV_ENGINE
-	printk("the key_md is 0x%x\n", key_md);
+    printk("the key_md is 0x%x\n", key_md);
 #endif
 
-	itx = locate_itemx(key_md, key, nkey, &cur_header, 1);
-	if (itx) {
+    itx = locate_itemx(key_md, key, nkey, &cur_header, 1);
+    if (itx) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("locate_itemx() failed in engine_create()\n");
+        printk("locate_itemx() failed in engine_create()\n");
 #endif
-		return -EEXIST;
-	} else if (!cur_header) {
+        return -EEXIST;
+    } else if (!cur_header) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("locate_itemx() failed in engine_update()\n");
+        printk("locate_itemx() failed in engine_update()\n");
 #endif
-		return -ENOSPC;
-	}
-	it = create_item(key, nkey, value, nvalue);
-	if (!it) {
+        return -ENOSPC;
+    }
+    it = create_item(key, nkey, value, nvalue);
+    if (!it) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("create_item() failed in engine_update()\n");
+        printk("create_item() failed in engine_update()\n");
 #endif
-		return -ENOSPC;
-	}
-	itx = create_itemx(key_md, it);
-	if (!itx) {
+        return -ENOSPC;
+    }
+    itx = create_itemx(key_md, it);
+    if (!itx) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("create_itemx() failed in engine_create()\n");
+        printk("create_itemx() failed in engine_create()\n");
 #endif
-		return -ENOSPC;
-	}
+        return -ENOSPC;
+    }
 #ifdef DEBUG_KKV_ENGINE
-	printk("itx=0x%lx, cur_header=0x%lx\n", (ulong) itx, (ulong) cur_header);
+    printk("itx=0x%lx, cur_header=0x%lx\n", (ulong) itx, (ulong) cur_header);
 #endif
-	return add_itemx(itx, cur_header);
+    return add_itemx(itx, cur_header);
 }
 
 ssize_t engine_replace(char *key, ssize_t nkey, char *value, ssize_t nvalue)
 {
-	struct item *it;
-	struct itemx *itx;
-	uint32_t key_md;
+    struct item *it;
+    struct itemx *itx;
+    uint32_t key_md;
 
-	key_md = hash(key, nkey, 0);
+    key_md = hash(key, nkey, 0);
 #ifdef DEBUG_KKV_ENGINE
-	printk("the key_md is 0x%x\n", key_md);
+    printk("the key_md is 0x%x\n", key_md);
 #endif
 
-	itx = find_itemx(key_md, key, nkey);
-	if (!itx) {
+    itx = find_itemx(key_md, key, nkey);
+    if (!itx) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("find_itemx() failed in engine_create()\n");
+        printk("find_itemx() failed in engine_create()\n");
 #endif
-		return -ENOENT;
-	}
-	it = create_item(key, nkey, value, nvalue);
-	if (!it) {
+        return -ENOENT;
+    }
+    it = create_item(key, nkey, value, nvalue);
+    if (!it) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("create_item() failed in engine_update()\n");
+        printk("create_item() failed in engine_update()\n");
 #endif
-		return -ENOSPC;
-	}
+        return -ENOSPC;
+    }
 
-	return update_itemx(itx, it);
+    return update_itemx(itx, it);
 }
 
 ssize_t engine_delete(char *key, ssize_t nkey)
 {
-	struct itemx *itx;
-	uint32_t key_md;
-	struct itemx **cur_header;
+    struct itemx *itx;
+    uint32_t key_md;
+    struct itemx **cur_header;
 
-	key_md = hash(key, nkey, 0);
+    key_md = hash(key, nkey, 0);
 #ifdef DEBUG_KKV_ENGINE
-	printk("the key_md is 0x%x\n", key_md);
+    printk("the key_md is 0x%x\n", key_md);
 #endif
 
-	itx = locate_itemx(key_md, key, nkey, &cur_header, 0);
-	if (!itx) {
+    itx = locate_itemx(key_md, key, nkey, &cur_header, 0);
+    if (!itx) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("locate_itemx() failed in engine_create()\n");
+        printk("locate_itemx() failed in engine_create()\n");
 #endif
-		return -ENOENT;
-	}
+        return -ENOENT;
+    }
 
-	return delete_itemx(itx, cur_header);
+    return delete_itemx(itx, cur_header);
 }
 
 ssize_t engine_shrink()
 {
-	shrink_item_system();
-	return 0;
+    shrink_item_system();
+    return 0;
 }
 
-//ssize_t engine_get(char *key, ssize_t nkey, char **value)
 
 ssize_t engine_get(char *key, ssize_t nkey, char *value, ssize_t nvalue)
 {
-	struct itemx *itx;
-	uint32_t key_md;
+    struct itemx *itx;
+    uint32_t key_md;
 
-	key_md = hash(key, nkey, 0);
+    key_md = hash(key, nkey, 0);
 #ifdef DEBUG_KKV_ENGINE
-	printk("the key_md is 0x%x\n", key_md);
+    printk("the key_md is 0x%x\n", key_md);
 #endif
 
-	itx = find_itemx(key_md, key, nkey);
-	if (!itx) {
+    itx = find_itemx(key_md, key, nkey);
+    if (!itx) {
 #ifdef DEBUG_KKV_ENGINE
-		printk("find_itemx() failed in engine_create()\n");
+        printk("find_itemx() failed in engine_create()\n");
 #endif
-		//*value = NULL;
-		return -ENOENT;
-	}
+        return -ENOENT;
+    }
 
-	return read_item(itx->it, value, nvalue);
-
-	//*value = VALUE_OF_ITEM(itx->it);
-	//return VALUE_SIZE_OF_ITEM(itx->it);
+    return read_item(itx->it, value, nvalue);
 }

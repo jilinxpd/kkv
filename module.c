@@ -15,7 +15,6 @@
 #include "file.h"
 #include "fs.h"
 
-MODULE_LICENSE("GPL");
 
 #ifdef DEBUG_KKV_STAT
 ssize_t used_memory_in_file(void);
@@ -91,5 +90,9 @@ static void __exit kkv_exit(void)
 #endif
 }
 
-module_init(kkv_init)
-module_exit(kkv_exit)
+module_init(kkv_init);
+module_exit(kkv_exit);
+
+MODULE_AUTHOR("jilinxpd");
+MODULE_DESCRIPTION("kkv");
+MODULE_LICENSE("GPL v2");

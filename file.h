@@ -9,6 +9,3 @@
 extern const struct address_space_operations kkv_aops;
 
 extern const struct file_operations kkv_file_operations;
-
-int prepare_in_file(void);
-void clean_in_file(void);

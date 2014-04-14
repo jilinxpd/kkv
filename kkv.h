@@ -53,5 +53,4 @@ ssize_t engine_add(char *key, ssize_t nkey, char *value, ssize_t nvalue);
 ssize_t engine_replace(char *key, ssize_t nkey, char *value, ssize_t nvalue);
 ssize_t engine_delete(char *key, ssize_t nkey);
 ssize_t engine_shrink(void);
-//ssize_t engine_get(char *key, ssize_t nkey, char **value);
 ssize_t engine_get(char *key, ssize_t nkey, char *value, ssize_t nvalue);

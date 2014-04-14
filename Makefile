@@ -1,9 +1,9 @@
 #
-## Makefile for the In-Kernel Key/Value Store.
+# Makefile for the In-Kernel Key/Value Store.
 #
 
 DEBUG_KKV_FS = y
-DEBUG_KKV_ENGINE = n
+DEBUG_KKV_ENGINE = y
 DEBUG_KKV_SLAB = n
 DEBUG_KKV_STAT = n
 
@@ -28,11 +28,12 @@ MODULEDIR= $(shell pwd)
 
 obj-m += kkv.o
 
-kkv-y +=  slab.o item.o itemx.o hash.o engine.o file.o inode.o fs.o module.o
+kkv-y +=  slab.o item.o itemx.o hash.o engine.o file.o inode.o fs.o module.o 
 
+.PHONY: all
 all:
 	${MAKE} -C ${KERNELDIR} M=${MODULEDIR} modules
 
+.PHONY: clean
 clean:
 	rm -rf *.o *.ko *.symvers *.order *.mod.c .*.cmd .tmp_versions
-
