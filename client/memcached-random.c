@@ -25,6 +25,12 @@
 #define PAYLOAD_MINLEN 64
 #define PAYLOAD_MAXLEN (BUF_SIZE-PAYLOAD_MINLEN)
 
+#ifdef VERBOSE_MEMCACHED_CLIENT
+#define PRINTF(...) printf(__VA_ARGS__)
+#else
+#define PRINTF(...)
+#endif
+
 
 static inline void compute_len(int i, int nr, size_t *key_len, size_t *value_len)
 {
@@ -97,7 +103,7 @@ static void random_get(int nr, char *buf, char seed, memcached_st *memc)
         if(memcached_failed(rc)) {
             printf("memcached_get() failed: %s\n",memcached_strerror(memc,rc));
         }
-        printf("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
         if(value)
             free(value);
     }
@@ -118,7 +124,7 @@ static void random_set(int nr, char *buf, char seed, memcached_st *memc)
         if(memcached_failed(rc)) {
             printf("memcached_set() failed: %s\n",memcached_strerror(memc,rc));
         }
-        printf("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
     }
 }
 
@@ -137,7 +143,7 @@ static void random_add(int nr, char *buf, char seed, memcached_st *memc)
         if(memcached_failed(rc)) {
             printf("memcached_add() failed: %s\n",memcached_strerror(memc,rc));
         }
-        printf("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
     }
 }
 
@@ -156,7 +162,7 @@ static void random_replace(int nr, char *buf, char seed, memcached_st *memc)
         if(memcached_failed(rc)) {
             printf("memcached_replace() failed: %s\n",memcached_strerror(memc,rc));
         }
-        printf("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%ld, value_len=%ld\n",i,key_len,value_len);
     }
 }
 
@@ -175,7 +181,7 @@ static void random_delete(int nr, char *buf, char seed, memcached_st *memc)
         if(memcached_failed(rc)) {
             printf("memcached_delete() failed: %s\n",memcached_strerror(memc,rc));
         }
-        printf("i=%d, key_len=%ld\n",i,key_len);
+        PRINTF("i=%d, key_len=%ld\n",i,key_len);
     }
 }
 
@@ -192,7 +198,8 @@ void print_usage()
 int main(int argc, char *argv[])
 {
     int i;
-    int nr;
+	int nr;
+	int ret=0;
     char op;
     char seed='0';
     char *server_addr;
@@ -202,7 +209,7 @@ int main(int argc, char *argv[])
     memcached_server_st *servers;
     memcached_return_t rc;
 
-    if(argc<2) {
+    if(argc<5) {
         print_usage();
         return -1;
     }
@@ -251,9 +258,9 @@ int main(int argc, char *argv[])
         break;
     default:
         print_usage();
-        return -1;
+        ret= -1;
     }
 
     memcached_free(memc);
-    return 0;
+    return ret;
 }
