@@ -1,5 +1,5 @@
 /*
-* Random test for KKV.
+* Rush test for KKV.
 *
 * Copyright (C) 2013 jilinxpd.
 *
@@ -23,6 +23,11 @@
 
 #define BUF_SIZE 4096
 
+#ifdef VERBOSE_KKV_CLIENT
+#define PRINTF(...) printf(__VA_ARGS__)
+#else
+#define PRINTF(...)
+#endif
 
 static inline void generate_key_value(int i, char *buf, char seed, char **key, uint32_t key_len, char **value, uint32_t value_len)
 {
@@ -62,7 +67,7 @@ static void rush_get(int nr, char *buf, char seed, uint32_t key_len, kkv_handler
         if(ret!=LIBKKV_RESULT_OK) {
             printf("libkkv_get() failed: %d\n",ret);
         }
-        printf("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
         free(value);
     }
 }
@@ -80,7 +85,7 @@ static void rush_set(int nr, char *buf, char seed, uint32_t key_len, uint32_t va
         if(ret!=LIBKKV_RESULT_OK) {
             printf("libkkv_set() failed: %d\n",ret);
         }
-        printf("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
 }
 
@@ -97,7 +102,7 @@ static void rush_add(int nr, char *buf, char seed, uint32_t key_len, uint32_t va
         if(ret!=LIBKKV_RESULT_OK) {
             printf("libkkv_add() failed: %d\n",ret);
         }
-        printf("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
 }
 
@@ -114,7 +119,7 @@ static void rush_replace(int nr, char *buf, char seed, uint32_t key_len, uint32_
         if(ret!=LIBKKV_RESULT_OK) {
             printf("libkkv_replace() failed: %d\n",ret);
         }
-        printf("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
+        PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
 }
 
@@ -131,7 +136,7 @@ static void rush_delete(int nr, char *buf, char seed, uint32_t key_len, kkv_hand
         if(ret!=LIBKKV_RESULT_OK) {
             printf("libkkv_delete() failed: %d\n",ret);
         }
-        printf("i=%d, key_len=%u\n",i,key_len);
+        PRINTF("i=%d, key_len=%u\n",i,key_len);
     }
 }
 
@@ -151,7 +156,7 @@ int main(int argc, char *argv[])
 {
     int i;
     int nr;
-	int ret;
+	int ret=0;
 	uint32_t key_len,value_len;
     char op;
 	char seed='0';
@@ -159,7 +164,7 @@ int main(int argc, char *argv[])
     kkv_handler *kh;
     char buf[BUF_SIZE];
 
-    if(argc<2) {
+    if(argc<8) {
         print_usage();
         return -1;
     }
@@ -210,9 +215,9 @@ int main(int argc, char *argv[])
         break;
     default:
         print_usage();
-        return -1;
+        ret= -1;
     }
 
     libkkv_free(kh);
-    return 0;
+    return ret;
 }
