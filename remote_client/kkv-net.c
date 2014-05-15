@@ -19,16 +19,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "libkkv.h"
+#include "libkkv-net.h"
 
 
 void print_usage()
 {
     printf("usage:\n"\
-           "\t kkv-client {file} {operation}\n"\
+           "\t kkv-net {ip} {port} {operation}\n"\
            "\t operation:\n"\
-           "\t\t config {ip} {port}\n"\
-           "\t\t deconfig\n"\
            "\t\t get {key}\n"\
            "\t\t set {key} {value}\n"\
            "\t\t add {key} {value}\n"\
@@ -42,40 +40,37 @@ void print_usage()
 int main(int argc, char *argv[])
 {
     char *op;
-    char *file_path;
-    kkv_handler *kh;
+    char *ip,*port;
+    void *kh;
     int ret;
     uint32_t key_len=0;
     uint32_t value_len=0;
     char *key=NULL;
     char *value=NULL;
 
-    if(argc<3) {
+    if(argc<4) {
         print_usage();
         return -1;
     }
 
-    file_path=argv[1];
-    op=argv[2];
-    if(argc>3) {
-        key=argv[3];
+    ip=argv[1];
+    port=argv[2];
+    op=argv[3];
+    if(argc>4) {
+        key=argv[4];
         key_len=strlen(key)+1;
     }
-    if(argc>4) {
-        value=argv[4];
+    if(argc>5) {
+        value=argv[5];
         value_len=strlen(value)+1;
     }
-    kh=libkkv_create(file_path);
+    kh=libkkv_create(ip,port);
     if(!kh) {
         printf("libkkv_create() failed\n");
         return -2;
     }
 
-    if(!strcmp(op,"config")) {
-        ret=libkkv_config(kh,key,value);//ip, port
-    } else if(!strcmp(op,"deconfig")) {
-        ret=libkkv_deconfig(kh);
-    } else if(!strcmp(op,"get")) {
+    if(!strcmp(op,"get")) {
         ret=libkkv_get(kh,key,key_len,&value,&value_len);
     } else if(!strcmp(op,"set")) {
         ret=libkkv_set(kh,key,key_len,value,value_len);

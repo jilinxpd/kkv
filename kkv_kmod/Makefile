@@ -28,7 +28,7 @@ MODULEDIR= $(shell pwd)
 
 obj-m += kkv.o
 
-kkv-y +=  slab.o item.o itemx.o hash.o engine.o file.o inode.o fs.o module.o 
+kkv-y +=  file.o fs.o inode.o socket.o server.o session.o protocol.o engine.o item.o itemx.o slab.o hash.o module.o
 
 .PHONY: all
 all:

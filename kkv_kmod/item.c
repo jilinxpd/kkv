@@ -12,9 +12,6 @@
 #include "kkv.h"
 #include "slab.h"
 
-
-
-
 /*
  * The power ranges from 4,5,6,...,19.
  */

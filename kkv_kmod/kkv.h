@@ -6,7 +6,13 @@
  * This file is released under the GPL.
  */
 
+#ifndef _KKV_KKV_H
+#define _KKV_KKV_H
+
+
 #define KKV_ON_KMALLOC
+
+#define KKV_REQ_BUF_SIZE (2 * PAGE_SIZE)
 
 /*
  * the struct item that support multi-region.
@@ -54,3 +60,6 @@ ssize_t engine_replace(char *key, ssize_t nkey, char *value, ssize_t nvalue);
 ssize_t engine_delete(char *key, ssize_t nkey);
 ssize_t engine_shrink(void);
 ssize_t engine_get(char *key, ssize_t nkey, char *value, ssize_t nvalue);
+
+
+#endif

@@ -33,4 +33,4 @@ memcached-rush: memcached-rush.c
 
 .PHONY: clean
 clean:
-	rm -f *.o kkv-client kkv-random kkv-rush memcached-random memcached-rush 
+	rm -f *.o kkv-client kkv-random kkv-rush memcached-random memcached-rush

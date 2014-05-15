@@ -14,8 +14,8 @@
 #include <asm/uaccess.h>
 #include <linux/aio.h>
 #include <linux/kernel.h>
-
 #include "kkv.h"
+#include "protocol.h"
 
 
 #define COMMAND_CONFIG 0
@@ -26,25 +26,6 @@
 #define COMMAND_REPLACE 13
 #define COMMAND_DELETE 14
 #define COMMAND_SHRINK 15
-
-
-typedef struct {
-    __u32 id;
-    __u32 command;
-    __u32 key_len;
-    __u32 value_len;
-    char data[0];
-} kkv_packet;
-
-
-
-struct kkv_request {
-    __u32 command;
-    char *key;
-    ssize_t nkey;
-    char *value;
-    ssize_t nvalue;
-};
 
 #ifdef DEBUG_KKV_STAT
 static ssize_t used_mem = 0;
@@ -61,7 +42,6 @@ ssize_t freed_memory_in_file(void)
 }
 #endif
 
-#define KKV_REQ_BUF_SIZE (2 * PAGE_SIZE)
 
 struct kkv_file_info {
     char kkv_req_buffer[KKV_REQ_BUF_SIZE];
@@ -187,98 +167,30 @@ static ssize_t kkv_aio_write(struct kiocb *iocb, const struct iovec *iov,
     return ret;
 }
 
-/* only support text key/value currently.
- */
-static int kkv_parse_request(char *buf, struct kkv_request *req, int rw, const struct iovec *iov, unsigned long nr_segs)
-{
-    kkv_packet *pk;
-
-    if (nr_segs != 1)
-        return -1;
-
-    //TODO: handle the scatter-gatter buffer
-    __copy_from_user(buf, iov[0].iov_base, iov[0].iov_len);
-
-    pk=(kkv_packet*)buf;
-    req->command=pk->command;
-    req->nkey=pk->key_len;
-    req->nvalue=pk->value_len ? pk->value_len : (KKV_REQ_BUF_SIZE-sizeof(kkv_packet)-req->nkey);
-    req->key=buf+sizeof(kkv_packet);
-    req->value=req->key+req->nkey;
-
-    return 0;
-}
-
-static ssize_t kkv_create_response(char *buf, struct kkv_request *req, const struct iovec *iov, unsigned long nr_segs)
-{
-    ssize_t len;
-    kkv_packet *pk;
-    pk=(kkv_packet*)buf;
-    pk->key_len=req->nkey;
-    pk->value_len=req->nvalue;
-    len=sizeof(kkv_packet)+req->nkey+req->nvalue;
-    __copy_to_user(iov[0].iov_base,buf,len);
-    return len;
-}
-
 static ssize_t kkv_DIO(int rw, struct kiocb *iocb, const struct iovec *iov,
                        loff_t offset, unsigned long nr_segs)
 {
-    ssize_t ret;
-    struct kkv_request req;
+    ssize_t ret, rsp_len;
     struct file *file = iocb->ki_filp;
-    char *kkv_req_buffer=file->private_data;
+    char *kkv_req_buf=file->private_data;
 
 #ifdef DEBUG_KKV_FS
     printk("the file name: %s\n", file->f_dentry->d_name.name);
 #endif
 
-    ret = kkv_parse_request(kkv_req_buffer, &req, rw, iov, nr_segs);
-    if (ret != 0) {
-        return -EINVAL;
+    if (nr_segs != 1)
+        return -1;
+
+    //TODO: handle the scatter-gatter buffer
+    __copy_from_user(kkv_req_buf, iov[0].iov_base, iov[0].iov_len);
+
+    ret=kkv_process_req(kkv_req_buf,KKV_REQ_BUF_SIZE,&rsp_len);
+    //We have a hack here:
+    //won't copy the response packet back to user if it contains no payload.
+    if(ret>0) {
+        __copy_to_user(iov[0].iov_base,kkv_req_buf,rsp_len);
     }
 
-#ifdef DEBUG_KKV_FS
-	printk("the command is: %d\n", req.command);
-	printk("the nkey is: %ld\n", req.nkey);
-	printk("the key is: %s\n", req.key);
-	printk("the nvalue is: %ld\n", req.nvalue);
-    printk("the value is: %s\n", req.value);
-#endif
-
-    ret = -EINVAL;
-    switch (req.command) {
-    case COMMAND_GET:
-        ret = engine_get(req.key, req.nkey, req.value, req.nvalue);
-        if (ret > 0) {
-            req.nvalue=ret;
-            kkv_create_response(kkv_req_buffer, &req, iov, nr_segs);
-        }
-        break;
-
-    case COMMAND_SET:
-        ret = engine_set(req.key, req.nkey, req.value, req.nvalue);
-        break;
-
-    case COMMAND_ADD:
-        ret = engine_add(req.key, req.nkey, req.value, req.nvalue);
-        break;
-
-    case COMMAND_REPLACE:
-        ret = engine_replace(req.key, req.nkey, req.value, req.nvalue);
-        break;
-
-    case COMMAND_DELETE:
-        ret = engine_delete(req.key, req.nkey);
-        break;
-
-    case COMMAND_SHRINK:
-        ret = engine_shrink();
-        break;
-
-    default:
-        ret=0;
-    }
     return ret;
 }
 

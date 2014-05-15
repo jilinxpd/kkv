@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 	int ret=0;
     char op;
     char seed='0';
-    char *server_addr;
+    char *server_addr;//ip addr or absolute path to unix socket file
     char buf[BUF_SIZE];
 
     memcached_st *memc;

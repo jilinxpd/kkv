@@ -57,7 +57,7 @@ static void rush_get(int nr, char *buf, char seed, uint32_t key_len, kkv_handler
 {
     int i;
     int ret;
-	uint32_t value_len;
+    uint32_t value_len;
     char *key, *value;
 
     for(i=0; i<nr; i++) {
@@ -65,7 +65,7 @@ static void rush_get(int nr, char *buf, char seed, uint32_t key_len, kkv_handler
 
         ret=libkkv_get(kh,key,key_len,&value,&value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_get() failed: %d\n",ret);
+            printf("libkkv_get() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
         free(value);
@@ -83,7 +83,7 @@ static void rush_set(int nr, char *buf, char seed, uint32_t key_len, uint32_t va
 
         ret=libkkv_set(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_set() failed: %d\n",ret);
+            printf("libkkv_set() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -100,7 +100,7 @@ static void rush_add(int nr, char *buf, char seed, uint32_t key_len, uint32_t va
 
         ret=libkkv_add(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_add() failed: %d\n",ret);
+            printf("libkkv_add() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -117,7 +117,7 @@ static void rush_replace(int nr, char *buf, char seed, uint32_t key_len, uint32_
 
         ret=libkkv_replace(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_replace() failed: %d\n",ret);
+            printf("libkkv_replace() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -134,7 +134,7 @@ static void rush_delete(int nr, char *buf, char seed, uint32_t key_len, kkv_hand
 
         ret=libkkv_delete(kh,key,key_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_delete() failed: %d\n",ret);
+            printf("libkkv_delete() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u\n",i,key_len);
     }
@@ -145,9 +145,9 @@ void print_usage()
     printf("\nusage:\n"
            "kkv-rush {options} {file}\n"
            "\t-o {s|a|r|d|g} the operation, one of set, add, replace, delete, get.\n"
-		   "\t-k the length of key.\n"
-		   "\t-v the length of value.\n"
-		   "\t-n the # of k/v pairs.\n\n"
+           "\t-k the length of key.\n"
+           "\t-v the length of value.\n"
+           "\t-n the # of k/v pairs.\n\n"
           );
 }
 
@@ -156,10 +156,10 @@ int main(int argc, char *argv[])
 {
     int i;
     int nr;
-	int ret=0;
-	uint32_t key_len,value_len;
+    int ret=0;
+    uint32_t key_len,value_len;
     char op;
-	char seed='0';
+    char seed='0';
     char *file_path;
     kkv_handler *kh;
     char buf[BUF_SIZE];
@@ -177,12 +177,12 @@ int main(int argc, char *argv[])
         }
 
         switch(argv[i][1]) {
-		case 'k':
-			key_len=atoi(argv[i+1]);
-			break;
-		case 'v':
-			value_len=atoi(argv[i+1]);
-			break;
+        case 'k':
+            key_len=atoi(argv[i+1]);
+            break;
+        case 'v':
+            value_len=atoi(argv[i+1]);
+            break;
         case 'n':
             nr=atoi(argv[i+1]);
             break;

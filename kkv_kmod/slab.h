@@ -6,6 +6,9 @@
  * This file is released under the GPL.
  */
 
+#ifndef _KKV_SLAB_H
+#define _KKV_SLAB_H
+
 
 struct slab_bucket {
     struct list_head partial_list, full_list, *free_list; //three lists for slabs.
@@ -24,3 +27,6 @@ void init_slab_bucket(struct slab_bucket * bucket, ssize_t item_size);
 void destroy_slab_bucket(struct slab_bucket * bucket);
 void *alloc_item_space(struct slab_bucket * bucket);
 void free_item_space(struct slab_bucket * bucket, void *item);
+
+
+#endif

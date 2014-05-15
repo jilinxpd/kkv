@@ -28,4 +28,6 @@ int libkkv_get(kkv_handler *kh, char *key, uint32_t key_len, char **value, uint3
 int libkkv_delete(kkv_handler *kh, char *key, uint32_t key_len);
 int libkkv_shrink(kkv_handler *kh);
 int libkkv_free(kkv_handler *kh);
+int libkkv_config(kkv_handler *kh, char *ip, char *port);
+int libkkv_deconfig(kkv_handler *kh);
 

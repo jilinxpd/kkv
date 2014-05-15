@@ -99,7 +99,7 @@ static void random_get(int nr, char *buf, char seed, kkv_handler *kh)
 
         ret=libkkv_get(kh,key,key_len,&value,&value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_get() failed: %d\n",ret);
+            printf("libkkv_get() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
         if(value) free(value);
@@ -119,7 +119,7 @@ static void random_set(int nr, char *buf, char seed, kkv_handler *kh)
 
         ret=libkkv_set(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_set() failed: %d\n",ret);
+            printf("libkkv_set() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -138,7 +138,7 @@ static void random_add(int nr, char *buf, char seed, kkv_handler *kh)
 
         ret=libkkv_add(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_add() failed: %d\n",ret);
+            printf("libkkv_add() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -157,7 +157,7 @@ static void random_replace(int nr, char *buf, char seed, kkv_handler *kh)
 
         ret=libkkv_replace(kh,key,key_len,value,value_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_replace() failed: %d\n",ret);
+            printf("libkkv_replace() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u, value_len=%u\n",i,key_len,value_len);
     }
@@ -176,7 +176,7 @@ static void random_delete(int nr, char *buf, char seed, kkv_handler *kh)
 
         ret=libkkv_delete(kh,key,key_len);
         if(ret!=LIBKKV_RESULT_OK) {
-            printf("libkkv_delete() failed: %d\n",ret);
+            printf("libkkv_delete() failed: ret=%d\n",ret);
         }
         PRINTF("i=%d, key_len=%u\n",i,key_len);
     }
