@@ -2,13 +2,23 @@
 # Makefile for the In-Kernel Key/Value Store.
 #
 
-DEBUG_KKV_FS = y
-DEBUG_KKV_ENGINE = y
+DEBUG_KKV_FS = n
+DEBUG_KKV_NETWORK = n
+DEBUG_KKV_SESSION = n
+DEBUG_KKV_ENGINE = n
 DEBUG_KKV_SLAB = n
 DEBUG_KKV_STAT = n
 
 ifeq (${DEBUG_KKV_FS},y)
   EXTRA_CFLAGS += -DDEBUG_KKV_FS
+endif
+
+ifeq (${DEBUG_KKV_NETWORK},y)
+  EXTRA_CFLAGS += -DDEBUG_KKV_NETWORK
+endif
+
+ifeq (${DEBUG_KKV_SESSION},y)
+  EXTRA_CFLAGS += -DDEBUG_KKV_SESSION
 endif
 
 ifeq (${DEBUG_KKV_ENGINE},y)

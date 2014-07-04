@@ -75,6 +75,7 @@ static int __init kkv_init(void)
         printk("init_worker() failed in kkv_init()\n");
 #endif
     }
+	init_protocol();
 out:
     return ret;
 }

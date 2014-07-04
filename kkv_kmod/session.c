@@ -74,7 +74,9 @@ kkv_session* create_session(void (*worker_main)(struct work_struct *), struct so
     s->cpu=cpu;
     ret=queue_work_on(cpu,wq,&s->work);
     if(!ret) {
+#ifdef DEBUG_KKV_SESSION
         printk("queue_work_on() failed in start_session()\n");
+#endif
     }
     cxt_percpu=per_cpu_ptr(cpucxts,cpu);
     list_add_tail(&s->list,&cxt_percpu->session_list);
@@ -92,22 +94,30 @@ int continue_session(kkv_session *s)
     ret=skt->ops->poll(skt->file,skt,NULL);
     if(test_bit(SESSION_STATE_RCV,&s->state)) { //in receiving
         if(!(ret & POLLRD)) { //if there's data to read
+#ifdef DEBUG_KKV_SESSION
             printk("won't queue_work() in continue_session(): POLLRD\n");
+#endif
             return -EAGAIN;
         }
     } else if(test_bit(SESSION_STATE_SND,&s->state)) { //in sending
         if(!(ret & POLLWR)) { //if there's space to write
+#ifdef DEBUG_KKV_SESSION
             printk("won't queue_work() in continue_session(): POLLWR\n");
+#endif
             return -EAGAIN;
         }
     }
 
+#ifdef DEBUG_KKV_SESSION
     printk("target=%d, cur=%d\n",s->cpu,get_cpu());
     put_cpu();
+#endif
 
     ret=queue_work_on(s->cpu,wq,&s->work);
     if(!ret) {
+#ifdef DEBUG_KKV_SESSION
         printk("queue_work() failed in continue_session()\n");
+#endif
         return -EFAULT;
     }
     return 0;
@@ -129,7 +139,9 @@ int init_workers(void)
 
     cpucxts=alloc_percpu(cpu_context);
     if(!cpucxts) {
+#ifdef DEBUG_KKV_SESSION
         printk("alloc_percpu() failed in init_workers()\n");
+#endif
         ret=-ENOMEM;
         goto out0;
     }
@@ -143,14 +155,18 @@ int init_workers(void)
 
     session_store=kmem_cache_create("kkv_session_store", sizeof(kkv_session), 0, SLAB_HWCACHE_ALIGN, NULL);
     if(!session_store) {
+#ifdef DEBUG_KKV_SESSION
         printk("kmem_cache_create() failed in init_workers()");
+#endif
         ret=-ENOMEM;
         goto out1;
     }
 
     wq=create_workqueue("kkvworker");
     if(!wq) {
+#ifdef DEBUG_KKV_SESSION
         printk("create_workqueue() failed in init_workers()\n");
+#endif
         ret=-ENOMEM;
         goto out2;
     }
@@ -178,12 +194,16 @@ void destroy_workers(void)
 
     //destroy sessions
     for_each_online_cpu(cpu) {
+#ifdef DEBUG_KKV_SESSION
         printk("destroy sessions on cpu %d\n",cpu);
+#endif
         cxt_percpu=per_cpu_ptr(cpucxts,cpu);
         head=&cxt_percpu->session_list;
         list_for_each_safe(ptr,tmp,head) {
             s=(kkv_session*)ptr;
+#ifdef DEBUG_KKV_SESSION
             printk("session=%p\n",s);
+#endif
             destroy_session(s);
         }
     }

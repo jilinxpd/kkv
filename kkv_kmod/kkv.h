@@ -61,5 +61,6 @@ ssize_t engine_delete(char *key, ssize_t nkey);
 ssize_t engine_shrink(void);
 ssize_t engine_get(char *key, ssize_t nkey, char *value, ssize_t nvalue);
 
+void init_protocol(void);
 
 #endif

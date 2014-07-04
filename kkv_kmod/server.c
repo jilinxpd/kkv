@@ -48,17 +48,21 @@ static void server_work(struct work_struct *work)
 
     server=container_of(work,kkv_server,work);
     server_socket=server->socket;
-
+again:
     slave_socket=accept_socket(server_socket);
+	if (!slave_socket)
+		return;
 
     session=create_session(session_work_socket,slave_socket);
     if(!session) {
-        printk("create_session() failed\n");
+#ifdef DEBUG_KKV_NETWORK
+		        printk("create_session() failed\n");
+#endif
         goto out;
     }
 
     set_slave_sk_callbacks(slave_socket,session);
-    return;
+    goto again;
 out:
     slave_socket->ops->shutdown(slave_socket,SHUT_RDWR);
     sock_release(slave_socket);
@@ -66,14 +70,17 @@ out:
 
 static void server_sk_state_change(struct sock *sk)
 {
+#ifdef DEBUG_KKV_NETWORK
     printk("server_sk_state_change(), sk_state=%u\n",sk->sk_state);
+#endif
 }
 
 static void server_sk_data_ready(struct sock *sk, int bytes)
 {
     kkv_server *s;
-
+#ifdef DEBUG_KKV_NETWORK
     printk("server_sk_data_ready(), sk_state=%u\n",sk->sk_state);
+#endif
 
     if(sk->sk_state==TCP_LISTEN) {
         s=(kkv_server*)sk->sk_user_data;
@@ -83,7 +90,9 @@ static void server_sk_data_ready(struct sock *sk, int bytes)
 
 static void server_sk_write_space(struct sock *sk)
 {
+#ifdef DEBUG_KKV_NETWORK
     printk("server_sk_write_space(), sk_state=%u",sk->sk_state);
+#endif
 }
 
 static void set_server_sock_callbacks(struct socket *sock,void *data)
@@ -109,7 +118,9 @@ int init_server(void *conf)
     if(!wq) {
         wq=create_singlethread_workqueue("kkvserver");
         if(!wq) {
+#ifdef DEBUG_KKV_NETWORK
             printk("create_workqueue() failed in server_init()\n");
+#endif
             return -ENOMEM;
         }
     }
@@ -123,8 +134,10 @@ int init_server(void *conf)
     se=(sock_entry_t *)conf;
     ret=sock_create_kern(se->family,se->type,se->protocol,&svr->socket);
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("sock_create_kern() failed=%d, family=%d, type=%d, protocol=%d\n",
                ret,se->family,se->type,se->protocol);
+#endif
         goto out0;
     }
 
@@ -132,37 +145,49 @@ int init_server(void *conf)
 
     ret=kernel_setsockopt(svr->socket,SOL_SOCKET,SO_REUSEADDR,(char*)&flags,sizeof(flags));
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_setsockopt() failed=%d, level=%d, name=%d\n",ret,SOL_SOCKET,SO_REUSEADDR);
+#endif
         goto out1;
     }
 
     ret=kernel_setsockopt(svr->socket,SOL_SOCKET,SO_KEEPALIVE,(char*)&flags,sizeof(flags));
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_setsockopt() failed=%d, level=%d, name=%d\n",ret,SOL_SOCKET,SO_KEEPALIVE);
+#endif
         goto out1;
     }
 
     ret=kernel_setsockopt(svr->socket,SOL_SOCKET,SO_LINGER,(char*)&ling,sizeof(ling));
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_setsockopt() failed=%d, level=%d, name=%d\n",ret,SOL_SOCKET,SO_LINGER);
+#endif
         goto out1;
     }
 
     ret=kernel_setsockopt(svr->socket,SOL_TCP,TCP_NODELAY,(char*)&flags,sizeof(flags));
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_setsockopt() failed=%d, level=%d, name=%d\n",ret,IPPROTO_TCP,TCP_NODELAY);
+#endif
         goto out1;
     }
 
     ret=kernel_bind(svr->socket,(struct sockaddr*)se->addr,se->addrlen);
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_bind() failed=%d\n",ret);
+#endif
         goto out1;
     }
 
     ret=kernel_listen(svr->socket,1024);
     if(ret<0) {
+#ifdef DEBUG_KKV_NETWORK
         printk("kernel_listen() failed=%d\n",ret);
+#endif
         goto out1;
     }
 

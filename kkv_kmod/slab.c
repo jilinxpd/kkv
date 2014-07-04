@@ -33,6 +33,7 @@ static struct slab_bucket slab_headers;
 /*
  * Global list for free slabs.
  */
+//TODO: we need a gc-thread to periodically release memory from free_list to the kernel.
 static struct list_head global_free_list;
 static struct list_head global_free_list_for_slab_headers;
 
@@ -63,7 +64,7 @@ static struct slab *alloc_slab(int is_slabh)
 	struct slab *new_slab = NULL;
 
 #ifdef KKV_ON_KMALLOC
-	addr = kmalloc(SLAB_SIZE, GFP_KERNEL);
+	addr = kmalloc(SLAB_SIZE, GFP_KERNEL);//GFP_KERNEL pages may be swapped to disk, that's just what we need.
 #else
 	addr = vmalloc(SLAB_SIZE);
 #endif	

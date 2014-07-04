@@ -14,6 +14,7 @@
 #include <asm/uaccess.h>
 #include <linux/aio.h>
 #include <linux/kernel.h>
+#include <linux/mutex.h>
 #include <asm/atomic.h>
 #include "kkv.h"
 #include "server.h"
@@ -47,16 +48,29 @@ struct kkv_request {
     ssize_t nvalue;
 };
 
+static struct mutex engine_lock;
+
+void init_protocol(void){
+
+	mutex_init(&engine_lock);
+
+}
+
+
 static int kkv_process_network(void *conf, int init)
 {
     int ret=0;
 
     if(init) {
         ret=init_server(conf);
+#ifdef DEBUG_KKV_ENGINE
         printk("init_server=%d\n",ret);
+#endif
     } else {
         close_server();
+#ifdef DEBUG_KKV_ENGINE
         printk("close_server\n");
+#endif
     }
     return ret;
 }
@@ -110,7 +124,7 @@ ssize_t kkv_process_req(char *io_buf, ssize_t max_len, ssize_t *rsp_len)
         return -EINVAL;
     }
 
-#ifdef DEBUG_KKV_FS
+#ifdef DEBUG_KKV_ENGINE
     printk("the command is: %d\n", req.command);
     printk("the nkey is: %ld\n", req.nkey);
     if(req.key)
@@ -131,7 +145,9 @@ ssize_t kkv_process_req(char *io_buf, ssize_t max_len, ssize_t *rsp_len)
         break;
 
     case COMMAND_GET:
+		mutex_lock(&engine_lock);
         ret = engine_get(req.key, req.nkey, req.value, req.nvalue);
+		mutex_unlock(&engine_lock);
         if (ret > 0) {
             req.command=COMMAND_ACK;
             req.nvalue=ret;
@@ -142,19 +158,27 @@ ssize_t kkv_process_req(char *io_buf, ssize_t max_len, ssize_t *rsp_len)
         goto rsp;
 
     case COMMAND_SET:
+		mutex_lock(&engine_lock);
         ret = engine_set(req.key, req.nkey, req.value, req.nvalue);
+		mutex_unlock(&engine_lock);
         break;
 
     case COMMAND_ADD:
+		mutex_lock(&engine_lock);
         ret = engine_add(req.key, req.nkey, req.value, req.nvalue);
+		mutex_unlock(&engine_lock);
         break;
 
     case COMMAND_REPLACE:
+		mutex_lock(&engine_lock);
         ret = engine_replace(req.key, req.nkey, req.value, req.nvalue);
+		mutex_unlock(&engine_lock);
         break;
 
     case COMMAND_DELETE:
+		mutex_lock(&engine_lock);
         ret = engine_delete(req.key, req.nkey);
+		mutex_unlock(&engine_lock);
         break;
 
     case COMMAND_SHRINK:
